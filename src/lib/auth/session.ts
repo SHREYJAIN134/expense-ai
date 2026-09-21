@@ -102,7 +102,21 @@ export function validateSessionToken(token: string | undefined | null): SessionU
       try {
         const payload: TokenPayload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8"));
         if (payload.u && payload.x && payload.x >= Date.now()) {
-          // Provision/ensure user record exists on current serverless instance
+          // Check DB row if present to support session revocation / DB expiration tests
+          try {
+            const db = getDb();
+            const id = hashToken(token);
+            const row = db.prepare("SELECT expires_at FROM sessions WHERE id = ?").get(id) as { expires_at: string } | undefined;
+            if (row) {
+              const rowExp = new Date(row.expires_at.replace(" ", "T") + "Z").getTime();
+              if (rowExp < Date.now()) {
+                db.prepare("DELETE FROM sessions WHERE id = ?").run(id);
+                return null;
+              }
+            }
+          } catch {
+            /* ignore DB lookup failure in serverless multi-instance */
+          }
           if (payload.e && payload.n) {
             ensureUserRecord(payload.u, payload.e, payload.n);
           }
