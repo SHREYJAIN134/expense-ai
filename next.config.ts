@@ -22,6 +22,11 @@ const csp = [
 const nextConfig: NextConfig = {
   // Native / server-only packages must not be bundled.
   serverExternalPackages: ["better-sqlite3", "pdfjs-dist", "pdfkit", "bcryptjs"],
+  // pdfjs loads its worker with a runtime import that file tracing cannot see. Without this the
+  // worker is missing from the serverless bundle and every upload fails with "The PDF could not be read".
+  outputFileTracingIncludes: {
+    "/api/**/*": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   // Old page URLs keep working after the move to the Ledger Line lenses (query strings are preserved).
