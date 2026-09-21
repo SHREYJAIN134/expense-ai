@@ -73,7 +73,7 @@ beforeAll(async () => {
 describe("migration 3 (additive settings only)", () => {
   it("applies once, keeps earlier tables and stores no derived data", () => {
     const ids = (db().prepare("SELECT id FROM schema_migrations ORDER BY id").all() as { id: number }[]).map((r) => r.id);
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual([1, 2, 3, 4, 5]);
     const cols = (db().prepare("PRAGMA table_info(user_settings)").all() as { name: string }[]).map((c) => c.name);
     expect(cols).toEqual(expect.arrayContaining(["safety_buffer", "change_min_pct", "change_min_amount", "change_min_txns", "anomaly_min_amount", "include_detected_recurring", "reserve_budgets"]));
     const tables = (db().prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[]).map((t) => t.name);

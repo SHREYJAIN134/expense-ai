@@ -69,7 +69,7 @@ export async function verifyPasswordResetOtp(email: string, otp: string): Promis
        ORDER BY created_at DESC LIMIT 1`
     )
     .get(user.id) as
-    | { id: string; user_id: string; otp_hash: string; attempts: number }
+    | { id: string; user_id: string; otp_hash: string; reset_token_hash: string | null; attempts: number }
     | undefined;
 
   if (!record) {
@@ -79,6 +79,10 @@ export async function verifyPasswordResetOtp(email: string, otp: string): Promis
   if (record.attempts >= MAX_OTP_ATTEMPTS) {
     db.prepare("UPDATE password_reset_otps SET used = 1 WHERE id = ?").run(record.id);
     throw new ApiError(400, "OTP_EXHAUSTED", "Too many incorrect attempts. Please request a new verification code.");
+  }
+
+  if (record.reset_token_hash) {
+    throw new ApiError(400, "INVALID_OTP", "Invalid or expired verification code.");
   }
 
   const inputHash = hashToken(cleanOtp);

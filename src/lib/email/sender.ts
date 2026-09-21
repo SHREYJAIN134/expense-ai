@@ -67,11 +67,6 @@ export async function sendOtpEmail(input: SendOtpInput): Promise<{ sent: boolean
   const from = process.env.EMAIL_FROM || "Expense AI <noreply@resend.dev>";
   const resendApiKey = process.env.RESEND_API_KEY?.trim();
 
-  // In non-production, print to console for convenient local testing
-  if (process.env.NODE_ENV !== "production" || process.env.DEBUG_EMAIL === "true") {
-    console.log(`[DEV EMAIL] OTP to ${to}: ${otp} (expires in ${expiresMinutes} min)`);
-  }
-
   // Provider 1: Resend HTTP API
   if (resendApiKey) {
     try {
@@ -91,22 +86,14 @@ export async function sendOtpEmail(input: SendOtpInput): Promise<{ sent: boolean
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error(`[email] Resend API error (${res.status}):`, errText);
         return { sent: false, reason: `Resend API returned ${res.status}` };
       }
 
       return { sent: true };
-    } catch (err) {
-      console.error("[email] Failed to send via Resend API:", err);
+    } catch {
       return { sent: false, reason: "HTTP_FETCH_ERROR" };
     }
   }
 
-  // No email credentials configured
-  if (process.env.NODE_ENV === "production") {
-    console.warn("[email] Warning: No email provider configured. Set RESEND_API_KEY or SMTP env vars in Vercel.");
-  }
-  
   return { sent: false, reason: "NO_EMAIL_PROVIDER_CONFIGURED" };
 }
