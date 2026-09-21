@@ -155,8 +155,12 @@ export function validateSessionToken(token: string | undefined | null): SessionU
 
 export function destroySession(token: string | undefined | null) {
   if (!token) return;
+  const id = hashToken(token);
   try {
-    getDb().prepare("DELETE FROM sessions WHERE id = ?").run(hashToken(token));
+    const db = getDb();
+    const row = db.prepare("SELECT user_id FROM sessions WHERE id = ?").get(id) as { user_id: string } | undefined;
+    const uid = row?.user_id || "revoked";
+    db.prepare("INSERT OR REPLACE INTO sessions (id, user_id, expires_at) VALUES (?, ?, '2000-01-01 00:00:00')").run(id, uid);
   } catch {
     /* ignore */
   }
@@ -165,7 +169,7 @@ export function destroySession(token: string | undefined | null) {
 export function destroyAllSessions(userId: string, exceptToken?: string | null) {
   const keep = exceptToken ? hashToken(exceptToken) : "";
   try {
-    getDb().prepare("DELETE FROM sessions WHERE user_id = ? AND id != ?").run(userId, keep);
+    getDb().prepare("UPDATE sessions SET expires_at = '2000-01-01 00:00:00' WHERE user_id = ? AND id != ?").run(userId, keep);
   } catch {
     /* ignore */
   }
