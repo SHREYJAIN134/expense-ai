@@ -106,7 +106,7 @@ export function errorResponse(err: unknown): Response {
   // Log ONLY the error class and code. Messages are deliberately not logged: driver/parser errors can
   // embed fragments of the data being processed (narrations, amounts, SQL parameters, passwords).
   const code = err && typeof err === "object" && "code" in err ? String((err as { code: unknown }).code).slice(0, 40) : "";
-  console.error("[api] unexpected error:", err instanceof Error ? (err.stack || err.message) : err, "code:", code);
+  console.error("[api] unexpected error:", err instanceof Error ? err.name : "unknown", code);
   return NextResponse.json({ error: { code: "INTERNAL", message: "Something went wrong on the server." } }, { status: 500 });
 }
 

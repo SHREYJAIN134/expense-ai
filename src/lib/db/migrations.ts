@@ -315,4 +315,24 @@ CREATE INDEX idx_txn_upi_ref ON transactions(user_id, upi_reference);
 ALTER TABLE statements ADD COLUMN provider_summary_json TEXT;                   -- e.g. Google Pay's Sent / Received totals
 `,
   },
+  {
+    id: 5,
+    name: "password_reset_otps",
+    sql: `
+-- Single-use, short-lived password reset OTPs with rate-limit and attempt tracking.
+CREATE TABLE password_reset_otps (
+  id                 TEXT PRIMARY KEY,
+  user_id            TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  email              TEXT NOT NULL,
+  otp_hash           TEXT NOT NULL,
+  reset_token_hash   TEXT,
+  expires_at         TEXT NOT NULL,
+  attempts           INTEGER NOT NULL DEFAULT 0,
+  used               INTEGER NOT NULL DEFAULT 0,
+  created_at         TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX idx_pro_user ON password_reset_otps(user_id);
+CREATE INDEX idx_pro_email ON password_reset_otps(email);
+`,
+  },
 ];

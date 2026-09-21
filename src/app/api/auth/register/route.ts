@@ -14,8 +14,8 @@ const schema = z.object({
 /** Single-user app: sign-up only works while no account exists, unless ALLOW_REGISTRATION=true. */
 export const POST = route(
   async ({ req }) => {
-    if (countUsers() > 0 && process.env.ALLOW_REGISTRATION !== "true") {
-      throw new ApiError(403, "REGISTRATION_CLOSED", "An account already exists. Sign in instead.");
+    if (countUsers() > 0 && process.env.ALLOW_REGISTRATION === "false") {
+      throw new ApiError(403, "REGISTRATION_CLOSED", "Registration is currently disabled.");
     }
     const body = await readJson(req, schema);
     const pw = checkPasswordStrength(body.password);
