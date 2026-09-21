@@ -20,3 +20,6 @@ next-env.d.ts
 *.xls
 !samples/*.pdf
 
+
+.vercel
+.env*
