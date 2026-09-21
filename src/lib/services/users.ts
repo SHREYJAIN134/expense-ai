@@ -55,6 +55,23 @@ export function getUserById(id: string) {
     | undefined;
 }
 
+export function ensureUserRecord(id: string, email: string, name: string) {
+  const db = getDb();
+  const existing = db.prepare("SELECT id FROM users WHERE id = ?").get(id);
+  if (!existing) {
+    withTransaction((tx) => {
+      tx.prepare("INSERT OR IGNORE INTO users (id, email, name, password_hash) VALUES (?, ?, ?, ?)").run(
+        id,
+        email.trim().toLowerCase(),
+        name.trim(),
+        "stateless-session-user",
+      );
+      tx.prepare("INSERT OR IGNORE INTO user_settings (user_id) VALUES (?)").run(id);
+      seedCategories(id);
+    });
+  }
+}
+
 export function getSettings(userId: string): UserSettings {
   const db = getDb();
   let row = db.prepare("SELECT * FROM user_settings WHERE user_id = ?").get(userId) as any;
