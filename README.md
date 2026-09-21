@@ -1,5 +1,6 @@
 # Expense AI
 
+https://expense-ai-rust.vercel.app/login
 A **private, single-user personal-finance analytics app** for HDFC bank statements. Upload a (password-protected) statement PDF, and it is decrypted and parsed on the server, normalised, de-duplicated, classified, stored in a relational database, and turned into analytics, charts, insights, forecasts and a data-grounded AI assistant.
 
 It is **not** connected to HDFC NetBanking and never asks for bank credentials - you upload statements manually.
