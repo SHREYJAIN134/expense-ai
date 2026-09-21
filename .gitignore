@@ -1,0 +1,22 @@
+node_modules
+.next
+out
+coverage
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+data/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+# Real statements must never be committed
+*.pdf
+*.csv
+*.xlsx
+*.xls
+!samples/*.pdf
+
