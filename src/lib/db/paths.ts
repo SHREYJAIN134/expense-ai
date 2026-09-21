@@ -39,16 +39,25 @@ export interface DataLocation {
 }
 
 export function resolveDataLocation(cwd: string = process.cwd(), env: NodeJS.ProcessEnv = process.env): DataLocation {
-  const url = env.DATABASE_URL?.trim();
+  let url = env.DATABASE_URL?.trim();
   if (url === ":memory:") return { dir: ":memory:", dbFile: ":memory:", source: "DATABASE_URL", insideSyncedFolder: false };
   if (url) {
+    if (process.platform !== "win32") {
+      url = url.replace(/\\/g, "/");
+    }
     const dbFile = path.resolve(cwd, url.replace(/^file:/, ""));
     return { dir: path.dirname(dbFile), dbFile, source: "DATABASE_URL", insideSyncedFolder: isCloudSyncedPath(dbFile) };
   }
   const explicit = env.EXPENSE_AI_DATA_DIR?.trim();
   if (explicit) {
-    const dir = path.resolve(cwd, explicit);
+    let dirPath = explicit;
+    if (process.platform !== "win32") dirPath = dirPath.replace(/\\/g, "/");
+    const dir = path.resolve(cwd, dirPath);
     return { dir, dbFile: path.join(dir, "expense-ai.db"), source: "EXPENSE_AI_DATA_DIR", insideSyncedFolder: isCloudSyncedPath(dir) };
+  }
+  if (env.VERCEL || env.AWS_LAMBDA_FUNCTION_NAME) {
+    const dir = "/tmp";
+    return { dir, dbFile: path.join(dir, "expense-ai.db"), source: "EXPENSE_AI_DATA_DIR", insideSyncedFolder: false };
   }
   if (isCloudSyncedPath(cwd)) {
     const dir = localAppDataDir();
