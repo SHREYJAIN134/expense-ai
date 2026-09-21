@@ -59,10 +59,7 @@ describe("Create Account & Password Reset OTP Features", () => {
       expect(otpRow.otp_hash).toBeDefined();
 
       // Simulate capturing dev log OTP (for testing verification)
-      // Extract OTP from test database via test helper or hash match
-      const testOtps = ["123456", "654321", "888888", "100000"];
       let validOtp: string | null = null;
-      
       // Compute known matching OTP for testing
       const crypto = await import("node:crypto");
       for (let i = 100000; i < 1000000; i++) {

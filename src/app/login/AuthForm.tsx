@@ -85,7 +85,7 @@ export default function AuthForm() {
         setResetToken(res.resetToken);
         setMode("new_password");
       } else if (mode === "new_password") {
-        await api<{ ok: boolean; message: string }>("/api/auth/reset-password", {
+        const _res = await api<{ ok: boolean; message: string }>("/api/auth/reset-password", {
           method: "POST",
           json: { resetToken, password },
         });
@@ -291,7 +291,7 @@ export default function AuthForm() {
                   <>
                     {registrationAllowed && (
                       <div className="dim">
-                        Don't have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <button
                           type="button"
                           className="link"
